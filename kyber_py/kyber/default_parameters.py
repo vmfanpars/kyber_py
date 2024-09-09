@@ -51,3 +51,10 @@ Key exchange object that uses Kyber1024 parameters internally.
 
 Provides about 256 bit level of security.
 """
+
+"""
+for kyber512  KYBER_K -> 2
+for kyber768  KYBER_K -> 3
+for kyber1024 KYBER_K -> 4
+"""
+KYBER_K = 2

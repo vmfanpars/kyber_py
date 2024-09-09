@@ -1,7 +1,7 @@
 import unittest
 import os
 import pytest
-from kyber_py.kyber import Kyber512, Kyber768, Kyber1024
+from kyber_py.kyber import Kyber512, Kyber768, Kyber1024, KYBER_K
 from kyber_py.drbg.aes256_ctr_drbg import AES256_CTR_DRBG
 
 def parse_kat_data(data):
@@ -157,9 +157,19 @@ def test_generic_kyber_known_answer(Kyber, seed, data):
     _ss = Kyber.decaps(sk, ct)
     assert _ss == data["ss"]
 
-pk, sk= Kyber512.keygen()
-key, c = Kyber512.encaps(pk)
-print(f"kyber_512 -> pk = {(pk)}\n, sk = {len(sk)}, key = {len(key)}, c = {len(c)}")
+if KYBER_K == 2:
+    pk, sk= Kyber512.keygen()
+    key, c = Kyber512.encaps(pk)
+elif KYBER_K == 3:
+    pk, sk= Kyber768.keygen()
+    key, c = Kyber768.encaps(pk)
+elif KYBER_K == 4:
+    pk, sk= Kyber1024.keygen()
+    key, c = Kyber1024.encaps(pk)
+else:
+    print("KYBER_K must be in {2, 3, 4}")
+
+print(f"Public Key char: {(pk)}\n, sk = {len(sk)}, key = {len(key)}, c = {len(c)}")
 
 # kyber = Kyber(DEFAULT_PARAMETERS["kyber_768"])
 pk, sk= Kyber768.keygen()
