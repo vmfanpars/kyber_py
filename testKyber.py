@@ -157,37 +157,46 @@ def test_generic_kyber_known_answer(Kyber, seed, data):
     _ss = Kyber.decaps(sk, ct)
     assert _ss == data["ss"]
 
-if KYBER_K == 2:
-    pk, sk= Kyber512.keygen()
-    key, c = Kyber512.encaps(pk)
-elif KYBER_K == 3:
-    pk, sk= Kyber768.keygen()
-    key, c = Kyber768.encaps(pk)
-elif KYBER_K == 4:
-    pk, sk= Kyber1024.keygen()
-    key, c = Kyber1024.encaps(pk)
+kyberLevel = {2: Kyber512, 3: Kyber768, 4: Kyber1024}
+if KYBER_K in kyberLevel:
+    kyber = kyberLevel[KYBER_K]
+    pk, sk = kyber.keygen()
+    key, c = kyber.encaps(pk)
+    _key = kyber.decaps(sk, c)
 else:
     print("KYBER_K must be in {2, 3, 4}")
 
-print(f"Public Key char: {(pk)}\n, sk = {len(sk)}, key = {len(key)}, c = {len(c)}")
+from kyber_py.kyber import __all__
+print("<----------", __all__[KYBER_K-2], "---------->")
 
-# kyber = Kyber(DEFAULT_PARAMETERS["kyber_768"])
-pk, sk= Kyber768.keygen()
-key, c = Kyber768.encaps(pk)
-print(f"kyber_768 -> pk = {len(pk)}, sk = {len(sk)}, key = {len(key)}, c = {len(c)}")
+pk_str = pk.decode(errors="ignore")
+print(f"Public Key char:\n{pk_str}")
+print(f"len pk char= {len(pk)}")
 
-# kyber = Kyber(DEFAULT_PARAMETERS["kyber_1024"])
-pk, sk= Kyber1024.keygen()
-key, c = Kyber1024.encaps(pk)
-print(f"kyber_1024 -> pk = {len(pk)}, sk = {len(sk)}, key = {len(key)}, c = {len(c)}")
+print(f"\nPublic Key:\n{pk}")
+print(f"len pk= {len(pk)}")
+print(f"\nSecret Key:\n{sk}")
+print(f"len sk= {len(sk)}")
+print(f"\n*** Duration of Public and Private keys generation: xxx milli second")
 
-_key = Kyber1024.decaps(sk, c)
-print(f"kyber_1024 -> len(_key) = {len(_key)}, len(key) = {len(key)}")
-print(f"kyber_1024 -> len(_key) = {(_key[:7])}, len(key) = {(key[:7])}")
+print(f"\nCiphertext:\n{c}")
+print(f"len sk= {len(c)}")
+print(f"\nShared Secret A:\n{key}")
+print(f"len ssa= {len(key)}")
+print(f"\n*** Duration of Ciphertext and Shared Secret A generation: xxx milli second")
 
-pk , sk = Kyber1024._cpapke_keygen()
-print("pk:!   ", len(pk), "  sk:   !   ", len(sk))
+print(f"\nShared Secret B:\n{_key}")
+print(f"len ssa= {len(_key)}")
+print(f"\n*** Duration of Shared Secret B generation: xxx milli second")
 
-# pke = Public Key Encryption
-sk_pke, pk_pke, pk_hash, z = Kyber1024._unpack_secret_key(sk)
-print(f"kyber_1024 -> sk_pke = {len(sk_pke)}, pk_pke = {len(pk_pke)}, pk_hash = {len(pk_hash)}, z = {len(z)}")
+print(f"\nPseudorandom Shared Secret A:\n{_key}")
+print(f"len ssa= {len(_key)}")
+
+print("\nThe End")
+
+# pk , sk = Kyber1024._cpapke_keygen()
+# print("pk:!   ", len(pk), "  sk:   !   ", len(sk))
+
+# # pke = Public Key Encryption
+# sk_pke, pk_pke, pk_hash, z = Kyber1024._unpack_secret_key(sk)
+# print(f"kyber_1024 -> sk_pke = {len(sk_pke)}, pk_pke = {len(pk_pke)}, pk_hash = {len(pk_hash)}, z = {len(z)}")
