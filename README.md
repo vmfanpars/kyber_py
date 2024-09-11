@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/GiacomoPope/kyber-py/badge.svg?branch=main)](https://coveralls.io/github/GiacomoPope/kyber-py?branch=main)
 
 
-# ML-KEM / CRYSTALS-Kyber Python Implementation
+# CRYSTALS-Kyber Python Implementation
 
 > [!CAUTION]
 > :warning: **Under no circumstances should this be used for cryptographic
@@ -12,21 +12,12 @@ applications.** :warning:
 > 
 > This is an educational resource and has not been designed to be secure
 > against any form of side-channel attack. The intended use of this project
-> is for learning and experimenting with ML-KEM and Kyber
+> is for learning and experimenting with Kyber
 
-This repository contains a pure python implementation of both:
-
-1. **ML-KEM**: The NIST Module-Lattice-Based Key-Encapsulation Mechanism
-Standard following [FIPS 203](https://csrc.nist.gov/pubs/fips/203/final)
-from the NIST post-quantum cryptography project.
-2. **CRYSTALS-Kyber**: following (at the time of writing) the most recent
+This repository contains a pure python implementation of
+**CRYSTALS-Kyber**: following (at the time of writing) the most recent
 [specification](https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf)
 (v3.02)
-
-**Note**: This project accompanies
-[`dilithium-py`](https://github.com/GiacomoPope/dilithium-py) which is a
-pure-python implementation of ML-DSA and CRYSTALS-Dilithium and shares a lot of
-the lower-level code of this implementation. 
 
 ## Disclaimer
 
@@ -38,29 +29,10 @@ This code is not constant time, or written to be performant. Rather, it was
 written so that the python code closely follows the Kyber specification
 [specification](https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf) and [FIPS 203](https://csrc.nist.gov/pubs/fips/203/final). No cryptographic guarantees are made of this work.
 
-## History of this Repository
-
-This work started by simply implementing Kyber for fun, however after NIST
-picked Kyber to standardise as ML-KEM, the repository grew and now includes both
-implementations of Kyber and ML-KEM. I assume as this repository ages, the Kyber
-implementation will get less useful and the ML-KEM one will be the focus, but
-for historical reasons we will include both. If only so that people can study
-the differences which NIST introduced during the standardisation of the
-protocol.
-
 ### KATs
 
-This implementation currently passes all KAT tests for `kyber` and `ml_kem` For
-more information, see the unit tests in [`test_kyber.py`](tests/test_kyber.py)
-and [`test_ml_kem.py`](tests/test_ml_kem.py).
-
-The KAT files were either downloaded or generated:
-
-1. For **ML-KEM**, the KAT files were download from the GitHub repository
-   [usnistgov/ACVP-Server/](https://github.com/usnistgov/ACVP-Server/releases/tag/v1.1.0.35) release 1.1.0.35, and are included in `assets/ML-KEM-*` directories.
-2. For **Kyber**, the KAT files were generated from the projects [GitHub
-   repository](https://github.com/pq-crystals/kyber/) and are included in
-   `assets/PQCLkemKAT_*.rsp`
+This implementation currently passes all KAT tests for `kyber` For
+more information, see the unit tests in [`testKyber.py`](tests/test_kyber.py).
 
 **Note**: for Kyber v3.02, there is a discrepancy between the specification and
 reference implementation. To ensure all KATs pass, one has to generate the
@@ -79,37 +51,6 @@ However, I have not implemented AES itself, instead I import this from `pycrypto
 To install dependencies, run `pip -r install requirements`.
 
 ## Using kyber-py
-
-### ML-KEM
-
-There are three functions exposed on the `ML_KEM` class which are intended for
-use:
-
-- `ML_KEM.keygen()`: generate a keypair `(ek, dk)`
-- `ML_KEM.encaps(ek)`: generate a key and ciphertext pair `(key, ct)`
-- `ML_KEM.decaps(dk, ct)`: generate the shared key `key`
-
-#### Example
-
-```python
->>> from kyber_py.ml_kem import ML_KEM_512
->>> ek, dk = ML_KEM_512.keygen()
->>> key, ct = ML_KEM_512.encaps(ek)
->>> _key = ML_KEM_512.decaps(dk, ct)
->>> assert key == _key
-```
-
-The above example would also work with `ML_KEM_768` and `ML_KEM_1024`.
-
-#### Benchmarks
-
-|  Params    |  keygen  |  keygen/s  |  encap  |  encap/s  |  decap  | decap/s |
-|------------|---------:|-----------:|--------:|----------:|--------:|--------:|
-| ML-KEM-512 |   1.96ms |     511.30 |  2.92ms |    342.26 |  4.20ms |  237.91 |
-| ML-KEM-768 |   3.31ms |     302.51 |  4.48ms |    223.04 |  6.14ms |  162.86 |
-| ML-KEM-1024|   5.02ms |     199.07 |  6.41ms |    155.89 |  8.47ms |  118.01 |
-
-All times recorded using a Intel Core i7-9750H CPU and averaged over 1000 runs.
 
 ### Kyber
 
@@ -159,7 +100,7 @@ All times recorded using a Intel Core i7-9750H CPU and averaged over 1000 runs.
 
 ## Polynomials and Modules
 
-There are two main things to worry about when implementing Kyber/ML-KEM. The
+There are two main things to worry about when implementing Kyber. The
 first thing to consider is the mathematics, which requires performing linear
 algebra in a module with elements in the ring $R_q = \mathbb{F}\_q[X] /(X^n + 1)$
 and the second is the sampling, compression and decompression, which links to
@@ -168,7 +109,7 @@ the cryptographic assurance of the protocol.
 For those who don't know, a module is a generalisation of a vector space, where
 elements of a matrix are not selected from a field (such as the rationals, or
 element of a finite field $\mathbb{F}\_{p^k}$), but rather in a ring (we do not
-require each element in a ring to have a multiplicative inverse). The ring in question for Kyber/ML-KEM is a polynomial ring where polynomials have coefficients in $\mathbb{F}\_{q}$ with $q = 3329$ and the polynomial ring has a modulus $X^n + 1$ with $n = 256$ (and so every element of the polynomial ring has at most 256 coefficients).
+require each element in a ring to have a multiplicative inverse). The ring in question for Kyber is a polynomial ring where polynomials have coefficients in $\mathbb{F}\_{q}$ with $q = 3329$ and the polynomial ring has a modulus $X^n + 1$ with $n = 256$ (and so every element of the polynomial ring has at most 256 coefficients).
 
 ### Polynomials
 
@@ -199,7 +140,7 @@ ring $R_{11} = \mathbb{F}_{11}[X] /(X^8 + 1)$ in the following way:
 ```
 
 We hope that this allows for some hands-on experience at working with these
-polynomials before starting to play with the whole of Kyber/ML-KEM.
+polynomials before starting to play with the whole of Kyber.
 
 For the "Kyber-specific" functions, needed to implement the protocol itself, we
 have made a child class `PolynomialRingKyber(PolynomialRing)` which has the
