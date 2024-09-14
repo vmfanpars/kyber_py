@@ -3,6 +3,7 @@ import os
 import pytest
 from kyber_py.kyber import Kyber512, Kyber768, Kyber1024, KYBER_K
 from kyber_py.drbg.aes256_ctr_drbg import AES256_CTR_DRBG
+from time import time
 
 def parse_kat_data(data):
     parsed_data = {}
@@ -157,6 +158,42 @@ def test_generic_kyber_known_answer(Kyber, seed, data):
     _ss = Kyber.decaps(sk, ct)
     assert _ss == data["ss"]
 
+def keygenTime(kyber, n):
+    tt = []
+    from tqdm import tqdm
+    for i in tqdm(range(n)):
+        tic = time()
+        kyber._cpapke_keygen()
+        toc = time()
+        tt.append((toc-tic)*1000)   # for convert from second to milisecond
+    tt = format((sum(tt)/len(tt)),'.3f')
+    return tt
+
+def encapsTime(kyber, pk, n):
+    tt = []
+    from tqdm import tqdm
+    for i in tqdm(range(n)):
+        tic = time()
+        kyber.encaps(pk)
+        toc = time()
+        tt.append((toc-tic)*1000)
+    tt = format((sum(tt)/len(tt)),'.3f')
+    return tt
+
+def decapsTime(kyber, sk, c, n):
+    tt = []
+    from tqdm import tqdm
+    for i in tqdm(range(n)):
+        tic = time()
+        kyber.decaps(sk,c)
+        toc = time()
+        tt.append((toc-tic)*1000)
+    tt = format((sum(tt)/len(tt)),'.3f')
+    return tt
+
+from kyber_py.kyber import __all__
+print("<----------", __all__[KYBER_K-2], "---------->")
+
 kyberLevel = {2: Kyber512, 3: Kyber768, 4: Kyber1024}
 if KYBER_K in kyberLevel:
     kyber = kyberLevel[KYBER_K]
@@ -165,12 +202,15 @@ if KYBER_K in kyberLevel:
     _key = kyber.decaps(sk, c)
 else:
     print("KYBER_K must be in {2, 3, 4}")
+n = 1000
+print()
+print("keygen time:", keygenTime(kyber, n), "\n")
+print("encaps time:", encapsTime(kyber, pk, n), "\n")
+print("decaps time:", decapsTime(kyber, sk, c, n))
 
-from kyber_py.kyber import __all__
-print("<----------", __all__[KYBER_K-2], "---------->")
 
 pk_str = pk.decode(errors="ignore")
-print(f"Public Key char:\n{pk_str}")
+print(f"\nPublic Key char:\n{pk_str}")
 print(f"len pk char= {len(pk)}")
 
 print(f"\nPublic Key:\n{pk}")
@@ -193,10 +233,3 @@ print(f"\nPseudorandom Shared Secret A:\n{_key}")
 print(f"len ssa= {len(_key)}")
 
 print("\nThe End")
-
-# pk , sk = Kyber1024._cpapke_keygen()
-# print("pk:!   ", len(pk), "  sk:   !   ", len(sk))
-
-# # pke = Public Key Encryption
-# sk_pke, pk_pke, pk_hash, z = Kyber1024._unpack_secret_key(sk)
-# print(f"kyber_1024 -> sk_pke = {len(sk_pke)}, pk_pke = {len(pk_pke)}, pk_hash = {len(pk_hash)}, z = {len(z)}")
